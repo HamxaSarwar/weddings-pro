@@ -38,33 +38,49 @@ export default function RSVPManagement() {
       if (weddingError) throw weddingError
       setWedding(weddingData)
 
-      // Fetch RSVPs with additional guests
+      // Fetch RSVPs first
       const { data: rsvpData, error: rsvpError } = await supabase
         .from('rsvps')
-        .select(`
-          *,
-          additional_guests (*)
-        `)
+        .select('*')
         .eq('wedding_id', weddingId)
         .order('created_at', { ascending: false })
 
       if (rsvpError) throw rsvpError
-      setRsvps(rsvpData || [])
+
+      // Fetch additional guests separately for each RSVP
+      const rsvpsWithGuests = []
+      for (const rsvp of rsvpData || []) {
+        const { data: guestsData, error: guestsError } = await supabase
+          .from('additional_guests')
+          .select('*')
+          .eq('rsvp_id', rsvp.id)
+
+        if (guestsError) {
+          console.error('Error fetching additional guests:', guestsError)
+        }
+
+        rsvpsWithGuests.push({
+          ...rsvp,
+          additional_guests: guestsData || []
+        })
+      }
+
+      setRsvps(rsvpsWithGuests)
 
       // Calculate statistics
-      const attending = rsvpData?.filter(rsvp => rsvp.attending === true) || []
-      const notAttending = rsvpData?.filter(rsvp => rsvp.attending === false) || []
-      const pending = rsvpData?.filter(rsvp => rsvp.attending === null) || []
+      const attending = rsvpsWithGuests.filter(rsvp => rsvp.attending === true) || []
+      const notAttending = rsvpsWithGuests.filter(rsvp => rsvp.attending === false) || []
+      const pending = rsvpsWithGuests.filter(rsvp => rsvp.attending === null) || []
       
-      const totalGuests = rsvpData?.reduce((total, rsvp) => {
+      const totalGuests = rsvpsWithGuests.reduce((total, rsvp) => {
         if (rsvp.attending === true) {
           return total + 1 + (rsvp.additional_guests?.length || 0)
         }
         return total
-      }, 0) || 0
+      }, 0)
 
       setStats({
-        total: rsvpData?.length || 0,
+        total: rsvpsWithGuests.length,
         attending: attending.length,
         notAttending: notAttending.length,
         pending: pending.length,
