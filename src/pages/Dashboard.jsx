@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import { Plus, Calendar, Users, Camera, Edit3, ExternalLink, Image, ClipboardList } from 'lucide-react'
+import { Plus, Calendar, Users, Camera, Edit3, ExternalLink, Image, ClipboardList, QrCode } from 'lucide-react'
+import QRCodeCard from '../components/QRCodeCard'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -9,7 +10,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
+  const [showQRCodeCard, setShowQRCodeCard] = useState(false)
   const [editingWedding, setEditingWedding] = useState(null)
+  const [selectedWedding, setSelectedWedding] = useState(null)
   const [newWedding, setNewWedding] = useState({
     title: '',
     bride_name: '',
@@ -85,6 +88,11 @@ export default function Dashboard() {
   const handleEditWedding = (wedding) => {
     setEditingWedding({ ...wedding })
     setShowEditForm(true)
+  }
+
+  const handleShowQRCode = (wedding) => {
+    setSelectedWedding(wedding)
+    setShowQRCodeCard(true)
   }
 
   const handleUpdateWedding = async (e) => {
@@ -225,6 +233,13 @@ export default function Dashboard() {
                         <span>View RSVPs</span>
                       </a>
                     </div>
+                    <button
+                      onClick={() => handleShowQRCode(wedding)}
+                      className="w-full bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600 transition-colors flex items-center justify-center space-x-1"
+                    >
+                      <QrCode className="h-4 w-4" />
+                      <span>Generate QR Code</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -567,6 +582,18 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* QR Code Card Modal */}
+        {showQRCodeCard && selectedWedding && (
+          <QRCodeCard
+            wedding={selectedWedding}
+            isOpen={showQRCodeCard}
+            onClose={() => {
+              setShowQRCodeCard(false)
+              setSelectedWedding(null)
+            }}
+          />
         )}
       </div>
     </div>
