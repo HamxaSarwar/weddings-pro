@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import { Plus, Calendar, Users, Camera, Edit3, ExternalLink, Image } from 'lucide-react'
+import { Plus, Calendar, Users, Camera, Edit3, ExternalLink, Image, ClipboardList } from 'lucide-react'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -209,13 +209,22 @@ export default function Dashboard() {
                         <span>Edit</span>
                       </button>
                     </div>
-                    <a
-                      href={`/wedding/${wedding.id}/gallery`}
-                      className="w-full bg-purple-500 text-white px-4 py-2 rounded text-sm hover:bg-purple-600 transition-colors flex items-center justify-center space-x-1"
-                    >
-                      <Image className="h-4 w-4" />
-                      <span>View Photos</span>
-                    </a>
+                    <div className="flex space-x-2">
+                      <a
+                        href={`/wedding/${wedding.id}/gallery`}
+                        className="flex-1 bg-purple-500 text-white px-4 py-2 rounded text-sm hover:bg-purple-600 transition-colors flex items-center justify-center space-x-1"
+                      >
+                        <Image className="h-4 w-4" />
+                        <span>View Photos</span>
+                      </a>
+                      <a
+                        href={`/wedding/${wedding.id}/rsvp`}
+                        className="flex-1 bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors flex items-center justify-center space-x-1"
+                      >
+                        <ClipboardList className="h-4 w-4" />
+                        <span>View RSVPs</span>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -7,6 +7,7 @@ import SignUp from './pages/SignUp'
 import Dashboard from './pages/Dashboard'
 import WeddingPage from './pages/WeddingPage'
 import PhotoGallery from './pages/PhotoGallery'
+import RSVPManagement from './pages/RSVPManagement'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -62,6 +63,17 @@ function AppRoutes() {
             <ProtectedRoute>
               <PhotoGallery />
             </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/wedding/:weddingId/rsvp" 
+          element={
+            <>
+              <Navbar />
+              <ProtectedRoute>
+                <RSVPManagement />
+              </ProtectedRoute>
+            </>
           } 
         />
       </Routes>
