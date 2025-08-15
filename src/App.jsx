@@ -66,7 +66,7 @@ function AppRoutes() {
           } 
         />
         <Route 
-          path="/wedding/:weddingId/rsvp" 
+          path="/wedding/:weddingId/manage-rsvp" 
           element={
             <>
               <Navbar />

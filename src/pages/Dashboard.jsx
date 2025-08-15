@@ -218,7 +218,7 @@ export default function Dashboard() {
                         <span>View Photos</span>
                       </a>
                       <a
-                        href={`/wedding/${wedding.id}/rsvp`}
+                        href={`/wedding/${wedding.id}/manage-rsvp`}
                         className="flex-1 bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition-colors flex items-center justify-center space-x-1"
                       >
                         <ClipboardList className="h-4 w-4" />
