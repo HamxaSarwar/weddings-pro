@@ -92,6 +92,11 @@ export default function WeddingPage() {
     setSubmitting(true)
 
     try {
+      // Basic validation
+      if (!rsvpForm.primary_guest_name || !rsvpForm.primary_guest_name.trim()) {
+        alert('Please enter your name.')
+        return
+      }
       // Insert RSVP
       const { data: rsvpData, error: rsvpError } = await supabase
         .from('rsvps')
@@ -104,18 +109,31 @@ export default function WeddingPage() {
 
       if (rsvpError) throw rsvpError
 
-      // Insert additional guests
+      // Insert additional guests (only those with names provided)
       if (rsvpForm.additional_guests.length > 0) {
-        const guestsToInsert = rsvpForm.additional_guests.map(guest => ({
-          rsvp_id: rsvpData[0].id,
-          ...guest
-        }))
+        const validGuests = rsvpForm.additional_guests.filter(guest => 
+          guest.first_name && guest.first_name.trim() && 
+          guest.last_name && guest.last_name.trim()
+        )
 
-        const { error: guestsError } = await supabase
-          .from('additional_guests')
-          .insert(guestsToInsert)
+        if (validGuests.length > 0) {
+          const guestsToInsert = validGuests.map(guest => ({
+            rsvp_id: rsvpData[0].id,
+            first_name: guest.first_name.trim(),
+            last_name: guest.last_name.trim(),
+            dietary_restrictions: guest.dietary_restrictions || null,
+            song_request: guest.song_request || null
+          }))
 
-        if (guestsError) throw guestsError
+          const { error: guestsError } = await supabase
+            .from('additional_guests')
+            .insert(guestsToInsert)
+
+          if (guestsError) {
+            console.error('Error inserting additional guests:', guestsError)
+            throw guestsError
+          }
+        }
       }
 
       alert('RSVP submitted successfully!')
@@ -132,7 +150,23 @@ export default function WeddingPage() {
       })
     } catch (error) {
       console.error('Error submitting RSVP:', error)
-      alert('Error submitting RSVP. Please try again.')
+      
+      // Provide more specific error messages
+      let errorMessage = 'Error submitting RSVP. Please try again.'
+      
+      if (error.message) {
+        if (error.message.includes('primary_guest_name')) {
+          errorMessage = 'Please enter your name.'
+        } else if (error.message.includes('wedding_id')) {
+          errorMessage = 'Invalid wedding ID. Please refresh the page and try again.'
+        } else if (error.message.includes('duplicate')) {
+          errorMessage = 'You have already submitted an RSVP for this wedding.'
+        } else {
+          errorMessage = `Error: ${error.message}`
+        }
+      }
+      
+      alert(errorMessage)
     } finally {
       setSubmitting(false)
     }
