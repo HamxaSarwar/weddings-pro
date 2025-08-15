@@ -97,12 +97,18 @@ export default function WeddingPage() {
         alert('Please enter your name.')
         return
       }
-      // Insert RSVP
+      // Insert RSVP (only fields that belong in rsvps table)
       const { data: rsvpData, error: rsvpError } = await supabase
         .from('rsvps')
         .insert([{
           wedding_id: weddingId,
-          ...rsvpForm,
+          primary_guest_name: rsvpForm.primary_guest_name,
+          primary_guest_email: rsvpForm.primary_guest_email,
+          primary_guest_phone: rsvpForm.primary_guest_phone,
+          attending: rsvpForm.attending,
+          dietary_restrictions: rsvpForm.dietary_restrictions,
+          song_request: rsvpForm.song_request,
+          message: rsvpForm.message,
           total_guests: 1 + rsvpForm.additional_guests.length
         }])
         .select()
@@ -161,6 +167,8 @@ export default function WeddingPage() {
           errorMessage = 'Invalid wedding ID. Please refresh the page and try again.'
         } else if (error.message.includes('duplicate')) {
           errorMessage = 'You have already submitted an RSVP for this wedding.'
+        } else if (error.message.includes('schema cache') || error.message.includes('additional_guests')) {
+          errorMessage = 'Database schema error. Please refresh the page and try again.'
         } else {
           errorMessage = `Error: ${error.message}`
         }
